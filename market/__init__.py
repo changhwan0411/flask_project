@@ -1,14 +1,10 @@
-import os
+from flask import Flask
 
-BASE_DIR = os.path.dirname(__file__)
+def create_app():
+    app = Flask(__name__)
 
-# DB접속 주소  pybo.db의 기본 경로를 {}로 삽입
-SQLALCHEMY_DATABASE_URI = 'sqlite:///{}'.format(os.path.join(BASE_DIR, 'market.db'))
+    @app.route('/')
+    def index():
+        pass
 
-# 이벤트 처리
-SQLALCHEMY_TRACK_MODIFICATIONS = False
-
-
-# CSRF 토큰 생성 (CSRF 공격의 방어를 위해 생성하는 무작위 문자열)
-# 실제 운영 때는 dev같은 간단한 문자열 사용하면 위험함
-SECRET_KEY = 'dev'
+    return app
