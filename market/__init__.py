@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
@@ -26,4 +26,9 @@ def create_app():
     app.register_blueprint(main_view.bp)
 
 
+    @app.route('/detail')
+    def detail():
+        return render_template('detail.html', product=None)
+
     return app
+
