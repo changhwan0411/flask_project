@@ -12,6 +12,7 @@ bp = Blueprint('auth', __name__, url_prefix='/auth')
 def signup():
     form = UserCreateForm()
     if request.method == 'POST' and form.validate_on_submit():
+
         # login_id로 중복 체크
         user = User.query.filter_by(login_id=form.user_id.data).first()
 
@@ -37,7 +38,9 @@ def login():
     form = UserLoginForm()
     if request.method == 'POST' and form.validate_on_submit():
         error = None
+
         user = User.query.filter_by(login_id=form.username.data).first()
+
         if not user:
             error = '존재하지 않는 사용자입니다.'
         elif not check_password_hash(user.password, form.password.data):
@@ -45,7 +48,9 @@ def login():
         if error is None:
             session.clear()
             session['user_id'] = user.id
+
             return redirect(url_for('main_view.index'))
+
         flash(error)
     return render_template('auth/login.html', form=form)
 
@@ -57,7 +62,7 @@ def load_logged_in_user():
         g.user = None
     else:
         g.user = User.query.get(user_id)
-
+        
 # 로그아웃 라우팅 함수
 @bp.route('/logout/')
 def logout():
@@ -83,4 +88,3 @@ def find_account():
             flash("일치하는 회원 정보가 없습니다.", "danger")
 
     return render_template('auth/find_account.html')
-
