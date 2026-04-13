@@ -12,22 +12,22 @@ bp = Blueprint('auth', __name__, url_prefix='/auth')
 def signup():
     form = UserCreateForm()
     if request.method == 'POST' and form.validate_on_submit():
-        #  중복 사용자 확인(id 기준)
-        user = User.query.filter_by(id=form.username.data).first()
+        # login_id로 중복 체크
+        user = User.query.filter_by(login_id=form.user_id.data).first()
+
         if not user:
-            user = User(
-                id=form.user_id.data,  # 모델의 id 필드
-                username=form.username.data,  # 모델의 username 필드
+            new_user = User(
+                login_id=form.user_id.data,  # 유저가 입력한 ID ('test00' 등)
+                username=form.username.data,
                 password=generate_password_hash(form.password1.data),
                 email=form.email.data,
-                phone=form.phone.data  # 모델의 phone 필드
-                )
-            db.session.add(user)
+                phone=form.phone.data
+            )
+            db.session.add(new_user)
             db.session.commit()
-            # 가입 성공 후 메인 페이지로 이동
-            return redirect(url_for('main_view.index'))
+            return redirect(url_for('auth.login'))  # 가입 후 로그인 페이지로
         else:
-            flash('이미 존재하는 사용자입니다.')
+            flash('이미 존재하는 아이디입니다.')
 
     return render_template('auth/signup.html', form=form)
 
@@ -37,7 +37,7 @@ def login():
     form = UserLoginForm()
     if request.method == 'POST' and form.validate_on_submit():
         error = None
-        user = User.query.filter_by(id=form.username.data).first()
+        user = User.query.filter_by(login_id=form.username.data).first()
         if not user:
             error = '존재하지 않는 사용자입니다.'
         elif not check_password_hash(user.password, form.password.data):
@@ -45,7 +45,7 @@ def login():
         if error is None:
             session.clear()
             session['user_id'] = user.id
-            return redirect(url_for('main.index'))
+            return redirect(url_for('main_view.index'))
         flash(error)
     return render_template('auth/login.html', form=form)
 
@@ -57,3 +57,9 @@ def load_logged_in_user():
         g.user = None
     else:
         g.user = User.query.get(user_id)
+
+# 로그아웃 라우팅 함수
+@bp.route('/logout/')
+def logout():
+    session.clear() # 세션의 모든 정보(user_id 등) 삭제
+    return redirect(url_for('main_view.index')) # 로그아웃 후 메인 페이지로 이동
