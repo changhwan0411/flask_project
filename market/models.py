@@ -20,7 +20,7 @@ class Admin(db.Model):
 class Item(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     item_title = db.Column(db.String(100), unique=False) # 상품 제목
-    item_price = db.Column(db.String(100)) # 가격
+    item_price = db.Column(db.Integer) # 가격
     item_reg_datetime = db.Column(db.DateTime(), unique = False) # 상품 업로드 시간
     item_description = db.Column(db.String(500)) # 상품 내용
 

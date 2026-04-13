@@ -1,15 +1,11 @@
 from flask import Blueprint, redirect, url_for, render_template
 from market.models import Item
 
-bp = Blueprint('main_view', __name__, url_prefix='/')
+bp = Blueprint('main', __name__, url_prefix='/')
 
 @bp.route('/')
 def index():
     return render_template('main.html')
-
-@bp.route('/signup')
-def signup():
-    return render_template('auth/signup.html')
 
 @bp.route('/detail/<item_id>/')  # 1. 주소 뒤에 상품 ID를 받도록 설정합니다.
 def detail(item_id):
