@@ -1,5 +1,4 @@
-from flask import Blueprint, redirect, url_for, render_template
-from market.models import Item
+from flask import Blueprint, render_template
 
 bp = Blueprint('main', __name__, url_prefix='/')
 
@@ -7,3 +6,4 @@ bp = Blueprint('main', __name__, url_prefix='/')
 def index():
     items = Item.query.order_by(Item.created_at.desc()).all()
     return render_template('main.html', items=items)
+

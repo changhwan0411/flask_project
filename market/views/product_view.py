@@ -1,7 +1,12 @@
+
 from flask import Blueprint, render_template, request, url_for, redirect, g
 from market.views.auth_view import login_required
 from market import db
-from market.models import Item, Category
+from market.models import Item, Category, Comment
+
+from datetime import datetime  # 날짜 기능을 쓰기 위해 추가
+
+
 
 bp = Blueprint('items', __name__, url_prefix='/items')
 
@@ -9,6 +14,7 @@ bp = Blueprint('items', __name__, url_prefix='/items')
 @bp.route('/product-upload/', methods=['GET', 'POST'])
 @login_required
 def product_upload():
+
     if request.method == 'POST':
         # HTML 폼에서 보낸 데이터 읽어옴
         title = request.form.get('subject')

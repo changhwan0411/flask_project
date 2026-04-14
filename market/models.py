@@ -18,6 +18,7 @@ class User(db.Model):
     role = db.Column(db.Enum('user', 'admin', name='user_roles'), default='user')
 
 
+
 # [2. 상품 모델]
 class Item(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -32,6 +33,18 @@ class Item(db.Model):
 
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
+
+# 상품 (4월14일 수정함)
+class Item(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    item_title = db.Column(db.String(100), unique=False) # 상품 제목
+    item_price = db.Column(db.Integer) # 가격
+    item_reg_datetime = db.Column(db.DateTime(), unique = False) # 상품 업로드 시간
+    item_description = db.Column(db.String(500)) # 상품 내용
+    # 어떤 유저가 올린 상품인지 연결 (외래키)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    user = db.relationship('User', backref=db.backref('item_set'))
+
 
     # 가격 음수 방지 제약조건
     __table_args__ = (
@@ -75,6 +88,7 @@ class Favorite(db.Model):
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 
 
+
 # [6. 리뷰 모델]
 class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -93,6 +107,20 @@ class ItemImage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     item_id = db.Column(db.Integer, db.ForeignKey('item.id', ondelete='CASCADE'), nullable=False)
     image_url = db.Column(db.String(300))
+
+# 댓글정보테이블
+class Comment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.Text(), nullable=False)
+    create_date = db.Column(db.DateTime(), nullable=False)
+
+    # 어떤 상품에 달린 댓글인지 연결 (Foreign Key)
+    item_id = db.Column(db.Integer, db.ForeignKey('item.id', ondelete='CASCADE'))
+    item = db.relationship('Item', backref=db.backref('comment_set'))
+
+    # (선택) 작성자 기능이 있다면 추가
+    # user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
+
 
     # images라는 이름으로 상품에서 여러 장의 이미지를 불러냄
     item = db.relationship('Item', backref='images')
