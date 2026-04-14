@@ -50,7 +50,7 @@ def login():
             session.clear()
             session['user_id'] = user.id
 
-            return redirect(url_for('main_view.index'))
+            return redirect(url_for('main.index'))
 
         flash(error)
     return render_template('auth/login.html', form=form)
@@ -68,7 +68,7 @@ def load_logged_in_user():
 @bp.route('/logout/')
 def logout():
     session.clear() # 세션의 모든 정보(user_id 등) 삭제
-    return redirect(url_for('main_view.index')) # 로그아웃 후 메인 페이지로 이동
+    return redirect(url_for('main.index')) # 로그아웃 후 메인 페이지로 이동
 
 # 계정찾기 라우팅 함수
 @bp.route('/find_account/', methods=['GET', 'POST'])
