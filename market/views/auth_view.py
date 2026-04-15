@@ -1,5 +1,8 @@
+from functools import wraps
+
 import functools
 import requests
+
 from flask import Blueprint, request, redirect, url_for, flash, render_template, session, g
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -12,7 +15,6 @@ bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 # [일반 회원가입]
 @bp.route('/signup/', methods=['GET', 'POST'])
-
 # 일반 아이디 회원가입
 def signup():
     form = UserCreateForm()
@@ -38,7 +40,6 @@ def signup():
 
 # [일반 로그인]
 @bp.route('/login/', methods=['GET', 'POST'])
-
 # 일반 아이디 로그인
 def login():
     form = UserLoginForm()
@@ -61,21 +62,17 @@ def login():
 
 @bp.before_app_request
 def load_logged_in_user():
-
     user_id = session.get('user_id')
     if user_id is None:
         g.user = None
     else:
         g.user = User.query.get(user_id)
 
-
 # 로그아웃 - 세션 정보를 모두 삭제
 @bp.route('/logout/')
 def logout():
-
     session.clear()
     return redirect(url_for('main.index'))
-
 
 # [계정 찾기(아이디/비밀번호 통합)]
 @bp.route('/find_account/', methods=['GET', 'POST'])
@@ -156,6 +153,7 @@ def kakao_sign_in():
 
 # 카카오 콜백 함수
 @bp.route('/kakao/callback/')
+
 def callback():
     # 1. 카카오로부터 전달받은 인증 코드 확인
     code = request.args.get("code")
@@ -244,6 +242,9 @@ def reset_password():
 
     return render_template('auth/reset_password.html', form=form)
 
+    session.clear() # 세션의 모든 정보(user_id 등) 삭제
+    return redirect(url_for('main.index')) # 로그아웃 후 메인 페이지로 이동
+
 
 # 데코레이션 함수
 def login_required(view):
@@ -254,7 +255,5 @@ def login_required(view):
 
             return redirect(url_for('auth.login', next=_next))
         return view(*args, **kwargs)
-
     return wrapped_view
-
 
