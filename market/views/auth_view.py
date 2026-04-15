@@ -1,51 +1,23 @@
 from functools import wraps
+
 import requests  # 주석 해제됨 (pip install requests 하셨으니 사용 가능)
 from flask import Blueprint, request, redirect, url_for, flash, render_template, session, g
 from werkzeug.security import generate_password_hash, check_password_hash
 import functools
 
+import requests
+
+
 from market import db
-from market.forms import UserCreateForm, UserLoginForm, FindAccountForm
 from market.models import User
+from market.forms import UserCreateForm, UserLoginForm, FindAccountForm
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
-# [카카오 로그인 설정값]
-CLIENT_ID = "e17055a5c7eb91012c7140978ae7788a"
-CLIENT_SECRET = "pBLVBBvlQebKOiGfJxZWa0h9VxRPRcTu"
-REDIRECT_URI = "http://localhost:5000/auth/kakao/callback/"
-
-# [카카오 서버와 직접 통신하는 클래스]
-class Oauth:
-    def __init__(self):
-        self.auth_server = "https://kauth.kakao.com%s"
-        self.api_server = "https://kapi.kakao.com%s"
-        self.default_header = {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "Cache-Control": "no-cache",
-        }
-
-    def auth(self, code):
-        return requests.post(
-            url=self.auth_server % "/oauth/token",
-            headers=self.default_header,
-            data={
-                "grant_type": "authorization_code",
-                "client_id": CLIENT_ID,
-                "client_secret": CLIENT_SECRET,
-                "redirect_uri": REDIRECT_URI,
-                "code": code,
-            },
-        ).json()
-
-    def userinfo(self, bearer_token):
-        return requests.get(
-            url=self.api_server % "/v2/user/me",
-            headers={**self.default_header, **{"Authorization": bearer_token}}
-        ).json()
-
 # [일반 회원가입]
 @bp.route('/signup/', methods=['GET', 'POST'])
+# 일반 아이디 회원가입
+
 def signup():
     form = UserCreateForm()
     if request.method == 'POST' and form.validate_on_submit():
@@ -54,6 +26,7 @@ def signup():
             new_user = User(
                 login_id=form.user_id.data,
                 username=form.username.data,
+                nickname=form.nickname.data,
                 password=generate_password_hash(form.password1.data),
                 email=form.email.data,
                 phone=form.phone.data
@@ -92,13 +65,15 @@ def load_logged_in_user():
     else:
         g.user = User.query.get(user_id)
 
-# [로그아웃]
+# 로그아웃 - 세션 정보를 모두 삭제
+
 @bp.route('/logout/')
 def logout():
     session.clear()
     return redirect(url_for('main.index'))
 
-# [아이디/비밀번호 찾기]
+
+# [계정 찾기(아이디/비밀번호 통합)]
 @bp.route('/find_account/', methods=['GET', 'POST'])
 def find_account():
     form = FindAccountForm()
@@ -110,7 +85,14 @@ def find_account():
             else:
                 flash("일치하는 회원 정보가 없습니다.", "danger")
         elif 'user_id' in request.form and 'email_for_pw' in request.form:
-            user = User.query.filter_by(login_id=form.user_id.data, email=form.email_for_pw.data).first()
+
+            user = User.query.filter_by(
+                login_id=form.user_id.data,
+                email=form.email_for_pw.data
+            ).first()
+
+            # 비밀번호 찾고 reset_password.html에서 그대로 확인
+            
             if user:
                 session['temp_reset_user_id'] = user.id
                 return redirect(url_for('auth.reset_password'))
@@ -119,6 +101,45 @@ def find_account():
     return render_template('auth/find_account.html', form=form)
 
 # [카카오 로그인 시작]
+
+# 카카오 로그인 설정값
+CLIENT_ID = "e17055a5c7eb91012c7140978ae7788a"
+CLIENT_SECRET = "pBLVBBvlQebKOiGfJxZWa0h9VxRPRcTu"
+REDIRECT_URI = "http://localhost:5000/auth/kakao/callback/"
+SIGNOUT_REDIRECT_URI = "http://127.0.0.1:5000/auth/logout/callback/"
+
+# 카카오 서버와 직접 통신하는 클래스
+class Oauth:
+    def __init__(self):
+        self.auth_server = "https://kauth.kakao.com%s"
+        self.api_server = "https://kapi.kakao.com%s"
+        self.default_header = {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Cache-Control": "no-cache",
+        }
+
+   # 유저의 프로필 정보 요청
+    def auth(self, code):
+        return requests.post(
+            url=self.auth_server % "/oauth/token",
+            headers=self.default_header,
+            data={
+                "grant_type": "authorization_code",
+                "client_id": CLIENT_ID,
+                "client_secret": CLIENT_SECRET,
+                "redirect_uri": REDIRECT_URI,
+                "code": code,
+            },
+        ).json()
+
+    def userinfo(self, bearer_token):
+        return requests.get(
+            url=self.api_server % "/v2/user/me",
+            headers={**self.default_header, **{"Authorization": bearer_token}}
+        ).json()
+
+# 카카오 로그인 라우팅
+
 @bp.route('/kakao/')
 def kakao_sign_in():
     kakao_oauth_url = f"https://kauth.kakao.com/oauth/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&prompt=login"
@@ -126,10 +147,14 @@ def kakao_sign_in():
 
 # [카카오 콜백]
 @bp.route('/kakao/callback/')
+
 def callback():
+    # 1. 카카오로부터 전달받은 인증 코드 확인
     code = request.args.get("code")
     if not code:
         return redirect(url_for('auth.login'))
+
+    # 2. 인증 코드로 카카오 토큰 요청
 
     oauth = Oauth()
     auth_info = oauth.auth(code)
@@ -137,31 +162,60 @@ def callback():
         flash(f"인증 실패: {auth_info.get('error_description')}")
         return redirect(url_for('auth.login'))
 
+    # 3. 토큰을 이용해 실제 사용자 정보 요청
     user_data = oauth.userinfo("Bearer " + auth_info['access_token'])
+
+    if not user_data or "id" not in user_data:
+        flash("카카오 정보를 불러오지 못했습니다.")
+        return redirect(url_for('auth.login'))
+
+    # --- [데이터 추출 및 가공] ---
+    kakao_id = str(user_data.get('id'))  # 카카오 고유번호 (login_id로 사용)
+
     kakao_account = user_data.get("kakao_account", {})
     profile = kakao_account.get("profile", {})
-    nickname = profile.get("nickname", "카카오유저")
-    email = kakao_account.get("email") or f"{user_data.get('id')}@kakao.com"
 
-    user = User.query.filter_by(email=email).first()
+
+    # 닉네임: 카카오 닉네임을 가져옴. 없으면 ID 기반으로 생성
+    nickname = profile.get("nickname")
+    if not nickname:
+        nickname = f"카카오유저_{kakao_id[:5]}"
+
+    # 이름: 닉네임과 동일하게 설정
+    username = profile.get("nickname", "카카오유저")
+
+    # 이메일: 이메일이 없는 경우 랜덤 이메일 생성
+    email = kakao_account.get("email") or f"{kakao_id}@kakao.com"
+
+    # --- [DB 연동 및 가입 처리] ---
+    # 이미 가입된 카카오 유저인지 login_id로 확인
+    user = User.query.filter_by(login_id=kakao_id).first()
+
     if not user:
+        # 처음 온 유저라면 새 유저 객체 생성
         user = User(
-            login_id=str(user_data.get('id')),
-            username=nickname,
+            login_id=kakao_id,
+            username=username,
+            nickname=nickname,
             email=email,
-            password=generate_password_hash(str(user_data.get('id')))
+            password=generate_password_hash(kakao_id),
+            phone=None
         )
         db.session.add(user)
         db.session.commit()
 
+    # 4. 세션 처리 및 로그인 완료
     session.clear()
     session['user_id'] = user.id
     session['is_kakao'] = True
     return redirect(url_for('main.index'))
 
+
 # [비밀번호 재설정]
 @bp.route('/reset_password/', methods=['GET', 'POST'])
 def reset_password():
+    # 세션에 정보 없으면 플래시 메시지
+
     user_id = session.get('temp_reset_user_id')
     if not user_id:
         flash("정상적인 접근이 아닙니다.", "danger")
@@ -176,11 +230,16 @@ def reset_password():
             user.password = generate_password_hash(form.password.data)
             db.session.commit()
             session.pop('temp_reset_user_id', None)
-            flash("비밀번호가 변경되었습니다. 새 비밀번호로 로그인하세요.", "success")
+            flash("비밀번호가 변경되었습니다.<br>새 비밀번호로 로그인하세요.", "success")
             return redirect(url_for('auth.login'))
     return render_template('auth/reset_password.html', form=form)
 
-# [데코레이터]
+
+    session.clear() # 세션의 모든 정보(user_id 등) 삭제
+    return redirect(url_for('main.index')) # 로그아웃 후 메인 페이지로 이동
+
+
+# 데코레이션 함수
 def login_required(view):
     @functools.wraps(view)
     def wrapped_view(*args, **kwargs):

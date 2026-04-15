@@ -2,7 +2,15 @@
 
 {% block content %}
 <div class="container" style="max-width: 800px; margin: 0 auto; padding: 40px 20px;">
-
+    <div class="d-flex justify-content-between">
+        <div class="d-flex justify-content-start align-items-end mb-2">
+            <p class="mb-0" style="font-size: 11px; color: #666666">카테고리 >&nbsp;</p>
+            <a href="{{ url_for('items.product_categories', category_id=cat.id) }}" style="font-size: 11px; color: #666666; text-decoration: none;">{{ cat.category_name }}</a>
+        </div>
+        <div class="d-flex justify-content-end">
+            <a href="{{ url_for('main.index') }}" class="custom-btn mb-4">메인으로</a>
+        </div>
+    </div>
     <!--기능 1: 상품의 시각적 정보를 보여주는 이미지 레이아웃 영역-->
     <section class="product-main" style="display: flex; gap: 40px; margin-bottom: 40px;">
         <div class="product-image" style="flex: 1;">
@@ -20,8 +28,9 @@
             <p style="color: #868e96; font-size: 15px;">{{ item.created_at.strftime('%Y.%m.%d') if item else '시간 정보 없음' }}</p>
 
             <!-- [데이터] Item 테이블의 item_price 데이터 출력-->
-            <h3 style="font-size: 24px; font-weight: bold; margin: 15px 0;">{{ item.item_price if item else '0'
-                }}원</h3>
+
+            <h3 style="font-size: 24px; font-weight: bold; margin: 15px 0;">{{ "{:,}원".format(product.item_price) if product else '0'
+                }}</h3>
 
             <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
 
@@ -65,7 +74,7 @@
         {{ item.comment_set|length }}개의 댓글이 있습니다.</h5>
 
     {% for comment in item.comment_set %}
-<div class="card my-3 shadow-sm" style="border: none; border-radius: 15px; background-color: #f8f9fa;">
+  <div class="card my-3 shadow-sm" style="border: none; border-radius: 15px; background-color: #f8f9fa;">
     <div class="card-body p-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
@@ -121,11 +130,11 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h4 style="font-size: 18px; font-weight: bold; margin: 0;">판매자의 판매상품</h4>
                 <a href="{{ url_for('items.user_items', user_id=item.user_id) }}"
-   style="font-size: 14px; color: #868e96; text-decoration: none;">
-   판매상품 더 보기 >
-</a>
+                  style="font-size: 14px; color: #868e96; text-decoration: none;">
+                  판매상품 더 보기 >
+                </a>
             </div>
-
+          
             <!--[로직] Jinja2 반복문을 사용하여 동일한 규격의 상품 카드 6개를 자동 생성( 오늘수정함 4월14일)-->
             <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-3">
                 {% for item in item_list %}
@@ -145,8 +154,8 @@
                         {{ item.item_title }}
                     </div>
 
-                    <div style="font-size: 15px; font-weight: bold; color: #212529;">
-                        {{ item.item_price }}원
+                    <div style="font-size: 15px; font-weight: bold; color: #212529;" class="text-mute">
+                        {{ "{:,}원".format(item.item_price) }}
                     </div>
 
                     <div style="font-size: 12px; color: #868e96; margin-top: 4px;">
@@ -156,7 +165,6 @@
                 {% endfor %}
             </div>
         </div>
-    </section>
 </div>
 
 {% endblock %}  {% block script %} <script type='text/javascript'>
