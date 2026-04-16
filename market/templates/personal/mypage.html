@@ -1,21 +1,22 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<style>
-    /* 마이페이지 전체 배경 */
-    /* 배경 색깔 변경 4월15일 */
-    body {
-        background-color: #ffffff;
-        color: #222;
-    }
+<!-- 마이페이지 토스트 팝업 -->
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div id="saveToast" class="save-toast">
+            {{ messages[0] }}
+        </div>
+    {% endif %}
+{% endwith %}
 
+<style>
     /* 너무 넓어보이는 콘텐츠 영역 감소 4월15일 */
     .container.mt-4 {
         max-width: 1120px;
         padding-top: 24px;
         padding-bottom: 48px;
     }
-
 
     /* 공통 섹션 카드 */
     /* 크기세부조절 4월15일 */
@@ -39,8 +40,6 @@
         align-items: center;
         gap: 8px;
     }
-
-
 
     /* 프로필 상단 영역 */
     /* 크기세부조절 4월15일 */
@@ -107,7 +106,6 @@
         font-weight: 800;
     }
 
-
     /* 프로필 원형 이미지 */
     /* 현재는 이미지 대신 이름 첫 글자를 표시 */
     /* 크기세부조절 4월15일 */
@@ -141,7 +139,6 @@
         border-color: #b3b3ff;
         color: #8f8ff7;
     }
-
 
     /* 상태 메시지 박스 */
     /* 크기세부조절 4월15일 */
@@ -265,7 +262,6 @@
         background: #ebe7ff;
     }
 
-
     /* 상품 / 찜 카드 공통 */
     /* 상품 등록시 나올 디자인 4월15일 */
     .card.h-100.border-0.shadow-sm {
@@ -320,10 +316,8 @@
         border-color: #6f61f2;
     }
 
-
     /* 빈 상태 메시지 박스 */
     /* 리뷰가 없을 때 사용 */
-
     .empty-box {
         background-color: #f8f8ff;
         border: 1px dashed #ccccff;
@@ -359,7 +353,6 @@
     }
 
     /* 리뷰 목록 */
-
     /* 리뷰숫자 4월15일*/
     .review-count {
         font-size: 14px;
@@ -475,7 +468,23 @@
             justify-content: flex-start;
         }
     }
-<!--    4월15일 수정함-->
+
+    /* 팝업 스타일 */
+    .save-toast {
+        position: fixed;
+        top: 20%;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #CCCCFF;
+        color: white;
+        padding: 15px 30px;
+        border-radius: 50px;
+        font-weight: bold;
+        box-shadow: 0 10px 20px rgba(108, 92, 231, 0.3);
+        z-index: 9999;
+        transition: opacity 0.5s ease;
+        opacity: 1;
+    }
 </style>
 
 <div class="container mt-4">
@@ -499,7 +508,7 @@
                         <h3 class="mb-0 me-2">{{ user.username }}</h3>
                         <!-- 회원 정보 수정으로 이동, 역활을 명확하게 하기 위해 편집버튼 이름 변경 4월15일 수정-->
                         <button class="profile-edit-btn" type="button"
-                            onclick="location.href='{{ url_for('mypage.edit_profile') }}'">내 정보 수정</button>
+                            onclick="location.href='{{ url_for('personal.edit_profile') }}'">내 정보 수정</button>
                     </div>
 
                     <!-- UID -->
@@ -762,6 +771,21 @@
             viewMode.style.display = 'block';
             editBtn.style.display = 'inline-block';
         });
+    });
+
+    // 토스트 팝업 JS
+    document.addEventListener('DOMContentLoaded', function() {
+        const toast = document.getElementById('saveToast');
+        if (toast) {
+            // 1.5초 동안 보여준 뒤에
+            setTimeout(function() {
+                toast.style.opacity = '0'; // 서서히 투명하게
+                // 애니메이션 끝나면 아예 제거
+                setTimeout(function() {
+                    toast.remove();
+                }, 500);
+            }, 1500);
+        }
     });
 </script>
 {% endblock %}

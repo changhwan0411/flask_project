@@ -216,16 +216,15 @@
             <div class="password-link-box">
                 <span class="password-link-text">비밀번호를 변경하시겠어요?</span>
                 <button type="button" class="btn-password-link"
-                    onclick="location.href='{{ url_for('mypage.change_password') }}'">
+                    onclick="location.href='{{ url_for('personal.change_password') }}'">
                     비밀번호 변경
                 </button>
             </div>
 
             <!-- 저장 버튼 -->
             <div class="button-row">
-                <button type="button" class="btn-cancel"
-                    onclick="location.href='{{ url_for('mypage.mypage') }}'">취소</button>
-                <button type="submit" class="btn-save">저장하기</button>
+                <button type="submit" class="btn-cancel" name="action" value="cancel">취소</button>
+                <button type="submit" class="btn-save" name="action" value="save">저장하기</button>
             </div>
         </form>
 

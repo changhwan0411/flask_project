@@ -1,11 +1,9 @@
 from functools import wraps
 
-import requests  # 주석 해제됨 (pip install requests 하셨으니 사용 가능)
+# import requests  # 주석 해제됨 (pip install requests 하셨으니 사용 가능)
 from flask import Blueprint, request, redirect, url_for, flash, render_template, session, g
 from werkzeug.security import generate_password_hash, check_password_hash
 import functools
-
-import requests
 
 
 from market import db

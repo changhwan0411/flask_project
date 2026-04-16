@@ -33,6 +33,7 @@ def my_page():
         wishes=wishes,
         reviews=reviews
     )
+
 # 회원정보변경 4월15일 생성
 @bp.route('/edit', methods=['GET', 'POST'])
 @login_required
@@ -40,14 +41,23 @@ def edit_profile():
     user = g.user
 
     if request.method == 'POST':
+        action = request.form.get('action')
+
         user.username = request.form['username']
         user.email = request.form['email']
         user.phone = request.form['phone']
 
-        db.session.commit()
-        flash('회원정보가 저장되었습니다.')
+        if action == 'cancel':
+            flash('수정이 취소되었습니다.')
+            return redirect(url_for('personal.my_page'))
+
+        elif action == 'save':
+            db.session.commit()
+            flash('회원정보가 저장되었습니다.')
+            return redirect(url_for('personal.my_page'))
 
     return render_template('personal/edit_profile.html', user=user)
+
 # 비밀번호 변경 페이지로 이동 4월 15일 생성
 @bp.route('/change-password', methods=['GET', 'POST'])
 @login_required
@@ -83,7 +93,7 @@ def change_password():
         db.session.commit()
 
         flash('비밀번호가 변경되었습니다.')
-        return redirect(url_for('mypage.change_password'))
+        return redirect(url_for('personal.edit_profile'))
 
 
     return render_template('personal/change_password.html', user=user)
