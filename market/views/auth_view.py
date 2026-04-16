@@ -1,6 +1,5 @@
 from functools import wraps
 
-import requests  # 주석 해제됨 (pip install requests 하셨으니 사용 가능)
 from flask import Blueprint, request, redirect, url_for, flash, render_template, session, g
 from werkzeug.security import generate_password_hash, check_password_hash
 import functools
@@ -109,7 +108,7 @@ def find_account():
     return render_template('auth/find_account.html', form=form)
 
 
-# ==== 카카오 로그인 시작====
+# 카카오 로그인 시작
 
 # 카카오 로그인 설정값
 CLIENT_ID = "e17055a5c7eb91012c7140978ae7788a"
