@@ -123,26 +123,29 @@
 
         <div class="other-products" style="margin-top: 40px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+
                 <h4 style="font-size: 18px; font-weight: bold; margin: 0;">{{ product.user.username if product.user else
                     '판매자' }}님의 판매상품</h4>
                 <a href="{{ url_for('items.user_items', user_id=product.user_id) }}"
                     style="font-size: 14px; color: #868e96; text-decoration: none;">판매상품 더 보기 ></a>
+
             </div>
             <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-3">
-                {% for p in product_list %}
+
+                {% for product in product_list %}
                 <div class="product-card col h-100" style="cursor: pointer;"
-                    onclick="location.href=`{{ url_for('items.product_details', item_id=p.id) }}`">
+                    onclick="location.href=`{{ url_for('items.product_details', item_id=product.id) }}`">
                     <div
                         style="width: 100%; margin-bottom: 10px; border-radius: 8px; overflow: hidden; background-color: #eee; border: 1px solid #f1f1f1;">
-                        <img src="{{ url_for('static', filename='uploads/' + (p.image_file if p.image_file else 'iphone.jpg')) }}"
+                        <img src="{{ url_for('static', filename='uploads/' + (product.image_file if product.image_file else 'iphone.jpg')) }}"
                             style="width: 100%; aspect-ratio: 1 / 1; object-fit: cover; display: block;">
                     </div>
                     <div
                         style="font-size: 14px; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #212529;">
-                        {{ p.item_title }}</div>
-                    <div style="font-size: 15px; font-weight: bold; color: #212529;">{{ "{:,}원".format(p.item_price) }}
+                        {{ product.item_title }}</div>
+                    <div style="font-size: 15px; font-weight: bold; color: #212529;">{{ "{:,}원".format(product.item_price) }}
                     </div>
-                    <div style="font-size: 12px; color: #868e96; margin-top: 4px;">{{ p.created_at.strftime('%Y.%m.%d')
+                    <div style="font-size: 12px; color: #868e96; margin-top: 4px;">{{ product.created_at.strftime('%Y.%m.%d')
                         }}</div>
                 </div>
                 {% endfor %}
