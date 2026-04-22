@@ -36,7 +36,7 @@
                 <!--원형 프로필, 프로필이미지 변경하면 출력되게 수정4월17일 -->
                 <div class="avatar-circle">
                     {% if user.profile_image %}
-                    <img src="{{ url_for('static', filename='uploads/profiles/' + user.profile_image) }}"
+                    <img src="{{ user.profile_image }}"
                         class="avatar-img" alt="사용자 프로필 이미지">
                     {% else %}
                     {{ (user.nickname or "U")[0] | upper }}
@@ -200,10 +200,10 @@
                 <p class="review-content">{{ review.content }}</p>
                 <small class="review-item-name">
                     거래 상품:
-                    {% if review.deal and review.deal.item %}
-                    {{ review.deal.item.item_title }}
+                    {% if review.deal and review.deal.items %}
+                        {{ review.deal.items.item_title }}
                     {% else %}
-                    삭제된 상품
+                        삭제된 상품
                     {% endif %}
                 </small>
             </div>
