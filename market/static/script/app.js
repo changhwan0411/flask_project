@@ -513,7 +513,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
 
-
             // 카테고리 선택할 때
             input.addEventListener('change', function() {
                 if(this.value !== "" && this.value !== "카테고리 선택") {
