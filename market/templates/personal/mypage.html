@@ -146,7 +146,7 @@
     {% endif %}
 </div>
 
-<!-- 찜한 물건 목록 탭구조로 수정 4월21일-->
+<!-- 찜한 물건 목록 탭구조로 4월22일 items로 수정-->
 <div class="mypage-section tab-panel" id="wishTab">
     <h5 class="section-title">❤️ 찜한 물건 목록 <span class="review-count">({{ wishes|length }})</span></h5>
 
@@ -162,12 +162,12 @@
                     </div>
 
                     <div class="product-info">
-                        <h6 class="card-title mb-1 text-truncate">{{ wish.item.item_title }}</h6>
+                        <h6 class="card-title mb-1 text-truncate">{{ wish.items.item_title }}</h6>
                         <p class="card-text fw-bold text-danger">
-                            {{ "{:,}원".format(wish.item.item_price) }}
+                            {{ "{:,}원".format(wish.items.item_price) }}
                         </p>
 
-                        <form method="post" action="{{ url_for('product.remove_favorite', item_id=wish.item.id) }}">
+                        <form method="post" action="{{ url_for('items.remove_favorite', item_id=wish.items.id) }}">
                             <button class="favorite-remove-btn" type="submit">찜 취소</button>
                         </form>
                     </div>
