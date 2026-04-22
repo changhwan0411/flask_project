@@ -481,9 +481,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 const errorDiv = document.getElementById(`error-${field.name}`);
 
                 if (!input.value || input.value.trim() === "" || input.value === "카테고리 선택") {
-
-                if (isInvalidValue) {
-                    isValid = false;
                     input.classList.add('is-invalid');
                     if (errorDiv) {
                         errorDiv.innerText = field.msg;
