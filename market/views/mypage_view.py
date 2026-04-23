@@ -3,7 +3,7 @@ import os
 import re
 import uuid
 
-from flask import Blueprint, render_template, g, request, flash, redirect, url_for, current_app
+from flask import Blueprint, render_template, g, request, flash, redirect, url_for, current_app, session
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 from market import db
@@ -13,11 +13,12 @@ from market.models import Item, Favorite, Review, User, ItemStatus, Deal
 # 경로 수정으로 인해 삭제 4월16일
 bp = Blueprint('personal', __name__, url_prefix='/personal')
 
-# 마이페이지
+# 마이페이지 4월23일
 @bp.route('/mypage/')
 @login_required
 def my_page():
     user = g.user
+    tab = session.pop('mypage_tab', 'product')
     # 판매중인 상품수로 변경 4월20일
     products = Item.query.join(ItemStatus).filter(
         Item.user_id == user.id,
@@ -36,7 +37,8 @@ def my_page():
         user=user,
         products=products,
         wishes=wishes,
-        reviews=reviews
+        reviews=reviews,
+        tab=tab
     )
 
 # 회원정보변경 4월16일 수정
@@ -97,8 +99,8 @@ def edit_profile():
                     os.rename(old_folder, new_folder)
 
                 if user.profile_image:
-                    user.profile_image = user.profile_image.replace(f'/profiles/{old_nickname}/',
-                                                                    f'/profiles/{new_nickname}/')
+                    user.profile_image = user.profile_image.replace(f'/static/uploads/profiles/{old_nickname}/',
+                                                                    f'/static/uploads/profiles/{new_nickname}/')
 
             # 변수저장
             user.nickname = new_nickname
@@ -128,9 +130,6 @@ def edit_profile():
             db.session.commit()
             flash('회원정보가 저장되었습니다.')
             return redirect(url_for('personal.my_page'))
-          
-
-
     return render_template('personal/edit_profile.html', user=user)
 
 # 비밀번호 변경 페이지로 이동 4월 15일 생성
@@ -181,6 +180,7 @@ def favorite():
 @bp.route('/seller/<int:user_id>/')
 def seller_profile(user_id):
     seller = User.query.get_or_404(user_id)
+    print(f"판매자 이미지 경로: {seller.profile_image}")
     tab = request.args.get('tab', 'products')
 
     products = Item.query.join(ItemStatus).filter(

@@ -1,6 +1,6 @@
 import os
-
-from flask import Blueprint, render_template, request, url_for, redirect, g, flash, current_app
+# 4월23일 session추가
+from flask import Blueprint, render_template, request, url_for, redirect, g, flash, current_app, session
 from market.views.auth_view import login_required
 from market import db
 from market.models import User, Item, Category, Comment, ItemStatus, ItemImage, Deal, Favorite
@@ -186,7 +186,7 @@ def toggle_favorite(item_id):
 
 
 # --- 마이페이지용 찜 삭제 기능 (창환 님이 에러 났던 부분) ---
-@bp.route('/wishlist/delete/<int:item_id>',methods=['POST'])
+@bp.route('/wishlist/delete/<int:item_id>', methods=['POST'])
 @login_required
 def remove_favorite(item_id):
     f = Favorite.query.filter_by(user_id=g.user.id, item_id=item_id).first()
@@ -195,7 +195,9 @@ def remove_favorite(item_id):
         db.session.commit()
         flash("찜 목록에서 삭제되었습니다.")
 
-    # 삭제 후 다시 마이페이지로 이동
+    # 삭제 후 다시 찜목록으로 1번만 이동 4월23일
+    session['mypage_tab'] = 'wish'
+    
     return redirect(url_for('personal.my_page'))
 
 # PDP.html 상품 상태 게시글 업로드 유저만 수정 가능하고 이외의 유저는 수정 불가능 함수 4월21일 수정

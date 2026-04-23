@@ -5,12 +5,14 @@ document.addEventListener('DOMContentLoaded', function () {
     if (flaskMsg && flaskMsg.value) {
         const msg = flaskMsg.value;
 
-        // 토스트 팝업 메시지 제외해야 하는 케이스(4/22)
+        // 토스트 팝업 메시지 제외해야 하는 케이스(4/23)
         // 1. 비밀번호 변경 완료 메시지
         // 2. 아이디 찾기 결과
+        // 3. 아이디, 비번 찾기 에러 메시지
         const isForbidden =
             (msg.includes("비밀번호") && msg.includes("변경")) ||
-            msg.includes("찾으시는 아이디는");
+            msg.includes("찾으시는 아이디는") ||
+            msg.includes("일치하는 회원 정보가 없습니다");
         // 위에 있는 메시지 아닐 때만 토스트 실행
         if (!isForbidden) {
             showToast(msg);
@@ -481,8 +483,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 const errorDiv = document.getElementById(`error-${field.name}`);
 
                 if (!input.value || input.value.trim() === "" || input.value === "카테고리 선택") {
-
-
+                    isValid = false;
+                    input.classList.add('is-invalid');
                     if (errorDiv) {
                         errorDiv.innerText = field.msg;
                         errorDiv.classList.add('show-error');
@@ -510,7 +512,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     errorDiv.classList.remove('show-error'); // 클래스 제거
                 }
             });
-
 
             // 카테고리 선택할 때
             input.addEventListener('change', function() {
@@ -730,7 +731,7 @@ function showToast(message) {
 
     const toastId = 'toast_' + Date.now();
     const toastHTML = `
-        <div id="${toastId}" class="toast align-items-center text-white border-0 show" role="alert" 
+        <div id="${toastId}" class="toast align-items-center text-white border-0 show" role="alert"
              style="background-color: #CCCCFF; border-radius: 12px; min-width: 250px; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
             <div class="d-flex">
                 <div class="toast-body text-center w-100">
