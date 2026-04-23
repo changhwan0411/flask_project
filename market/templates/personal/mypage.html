@@ -159,7 +159,7 @@
                             <img src="{{ wish.items.images[0].image_url }}" class="product-thumb-img"
                                 alt="{{ wish.items.item_title }}">
                             {% else %}
-                            <img src="{{ url_for('static', filename='img/default_wish.png') }}"
+                            <img src="{{ url_for('static', filename='img/default.png') }}"
                                 class="product-thumb-img" alt="찜이미지">
                             {% endif %}
                         </div>
@@ -216,7 +216,7 @@
                     review.deal.items.images %}
                     <img src="{{ review.deal.items.images[0].image_url }}" alt="상품 이미지">
                     {% else %}
-                    <img src="{{ url_for('static', filename='img/default_product.png') }}" alt="상품 이미지">
+                    <img src="{{ url_for('static', filename='img/default.png') }}" alt="상품 이미지">
                     {% endif %}
                 </div>
             </div>
