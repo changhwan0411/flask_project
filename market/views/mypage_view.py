@@ -5,6 +5,7 @@ import shutil
 
 from flask import Blueprint, render_template, g, request, flash, redirect, url_for, current_app
 from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.utils import secure_filename
 from market import db
 from market.views.auth_view import login_required
 from market.models import Item, Favorite, Review, User, ItemStatus, Deal
