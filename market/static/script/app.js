@@ -208,16 +208,16 @@ document.addEventListener('DOMContentLoaded', function () {
             // 3. 서버 에러 시 사라졌던 메시지창이 없으면 새로 생성
             if (msgId) {
                 let msgElement = document.getElementById(msgId);
-                if (!msgElement){
+                if (!msgElement) {
                     const newDiv = document.createElement('div');
                     newDiv.id = msgId;
                     newDiv.className = "check-msg";
                     inputElement.parentNode.insertBefore(newDiv, inputElement.nextSibling);
                 }
-                } else {
-                    msgElement.innerText = ""; // 오류 뜨고나서는 중복체크가 안돼서 추가 4/22
-                }
-            });
+            } else {
+                msgElement.innerText = ""; // 오류 뜨고나서는 중복체크가 안돼서 추가 4/22
+            }
+        });
 
         // 입력 완료 -> 포커스 나갈 때 중복 체크 실행
         inputElement.addEventListener('blur', function () {
@@ -315,7 +315,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 상품 이미지 페이지네이션 기능, 상품 삭제 시 alert ( PDP.html ) 4월20일 코드 수정
+    // 상품 이미지 페이지네이션 기능, 상품 삭제 시 alert ( PDP.html )
     const slides = document.querySelectorAll('.p-detail-img');
     const slideNum = document.getElementById('slideNum');
     let slideIdx = 0;
@@ -362,6 +362,18 @@ document.addEventListener('DOMContentLoaded', function () {
             btn.style.display = 'none';
         }
     };
+
+    // 답변 입력창 토글 함수 (4월 24일 추가)
+window.toggleReplyForm = function (commentId) {
+    const form = document.getElementById(`reply-form-${commentId}`);
+    if (form) {
+        if (form.style.display === 'none' || form.style.display === '') {
+            form.style.display = 'block';
+        } else {
+            form.style.display = 'none';
+        }
+    }
+};
 
     // 상품 업로드 페이지 사진 업로드 구간 기능 ( write.html )
     const input = document.getElementById('images-input');
@@ -454,58 +466,57 @@ document.addEventListener('DOMContentLoaded', function () {
 
         uploadForm.addEventListener('submit', function (e) {
             let isValid = true;
+            let errorMsg = "";
 
-            // 검사할 필드들 설정
-            const fields = [
-                { name: 'title', msg: '상품명을 입력해주세요.' },
-                { name: 'category', msg: '카테고리를 선택해주세요.' },
-                { name: 'price', msg: '가격을 입력해주세요.' },
-                { name: 'content', msg: '상세 설명을 입력해주세요.' }
-            ];
+            // 상품 등록 시 에러메시지 전용 필드 설정
+            const titleInp = this.querySelector('[name="title"]');
+            const categoryInp = this.querySelector('[name="category"]');
+            const priceInp = this.querySelector('[name="price"]');
+            const contentInp = this.querySelector('[name="content"]');
 
-            // 텍스트 에러 테스트
-            fields.forEach(field => {
-                const input = this.querySelector(`[name="${field.name}"]`);
-                const errorDiv = document.getElementById(`error-${field.name}`);
-
-                if (input) {
-                    const val = input.value.trim();
-                    if (!val || val === "" || (field.name === 'category' && val === "")) {
-                        isValid = false;
-                        input.classList.add('is-invalid');
-                        if (errorDiv) {
-                            errorDiv.innerText = field.msg;
-                            errorDiv.classList.add('show-error');
-                            errorDiv.style.display = 'block';
-                        }
-                    }
-                }
-            });
+            // 상품 등록 시 빈칸 검증
+            // 상품명 검증
+            if (!titleInp.value.trim()) {
+                errorMsg = "상품명을 입력해주세요.";
+                isValid = false;
+                titleInp.focus();
+            }
+            // 카테고리 검증
+            else if (!categoryInp.value || categoryInp.value === "") {
+                errorMsg = "카테고리를 선택해주세요.";
+                isValid = false;
+                categoryInp.focus();
+            }
+            // 가격 및 음수 검증
+            else if (!priceInp.value.trim()) {
+                errorMsg = "가격을 입력해주세요.";
+                isValid = false;
+                priceInp.focus();
+            } else if (parseInt(priceInp.value) < 0) {
+                errorMsg = "음수는 입력 불가능합니다.";
+                isValid = false;
+                priceInp.focus();
+            }
+            // 내용 검증
+            else if (!contentInp.value.trim()) {
+                errorMsg = "상세 설명을 입력해주세요.";
+                isValid = false;
+                contentInp.focus();
+            }
 
             if (!isValid) {
                 e.preventDefault();
-                e.stopPropagation();
-                const firstError = this.querySelector('.is-invalid');
-                if (firstError) {
-                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    firstError.focus();
-                }
+                showToast(errorMsg);
+
+                document.activeElement.classList.add('is-invalid');
             }
         });
 
-        // 실시간 에러 제거
+        // 입력 시 실시간 에러 제거
         uploadForm.querySelectorAll('.custom-input').forEach(input => {
-            const clearError = function() {
+            input.addEventListener('input', function() {
                 this.classList.remove('is-invalid');
-                const name = this.getAttribute('name');
-                const errorDiv = document.getElementById(`error-${name}`);
-                if (errorDiv) {
-                    errorDiv.classList.remove('show-error');
-                    errorDiv.style.display = 'none';
-                }
-            };
-            input.addEventListener('input', clearError);
-            input.addEventListener('change', clearError);
+            });
         });
     }
 
@@ -687,10 +698,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     // 구매이력 페이지네이션 4월22일
     initPagedList({
-    listSelector: '.paged-purchase-list',
-    itemSelector: '.purchase-page-item',
-    pageSize: 5,
-    displayType: 'flex'
+        listSelector: '.paged-purchase-list',
+        itemSelector: '.purchase-page-item',
+        pageSize: 5,
+        displayType: 'flex'
     });
 
     initPagedList({
@@ -703,7 +714,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initPagedList({
         listSelector: '.paged-grid[data-tab-name="mainList"]',
         itemSelector: '.product-item',
-        pageSize: 20,
+        pageSize: 16,
         displayType: 'block'
     });
 
