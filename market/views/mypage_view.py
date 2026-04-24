@@ -5,6 +5,7 @@ import shutil
 
 from flask import Blueprint, render_template, g, request, flash, redirect, url_for, current_app
 from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.utils import secure_filename
 from market import db
 from market.views.auth_view import login_required
 from market.models import Item, Favorite, Review, User, ItemStatus, Deal
@@ -25,8 +26,10 @@ def my_page():
         ItemStatus.item_status == '판매중'
     ).order_by(Item.created_at.desc()).all()
 
-    wishes = Favorite.query.filter_by(user_id=user.id)\
-        .order_by(Favorite.created_at.desc()).all()
+    wishes = Favorite.query.join(Item).filter(
+        Favorite.user_id == user.id,
+        Item.is_deleted == False
+    ).order_by(Favorite.created_at.desc()).all()
 
     reviews = Review.query.filter_by(target_user_id=user.id)\
         .order_by(Review.created_at.desc()).all()
